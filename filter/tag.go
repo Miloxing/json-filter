@@ -118,3 +118,14 @@ func newOmitNotTag(omitScene, fieldName string) tag {
 		SelectScene:  omitScene,
 	}
 }
+
+// 匿名字段的默认tag
+func newAnonymousDefaultTag(scene, fieldName string) tag {
+	return tag{
+		FieldName:    fieldName,
+		UseFieldName: "",
+		IsAnonymous:  true,
+		IsSelect:     true,
+		SelectScene:  scene,
+	}
+}

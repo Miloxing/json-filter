@@ -71,35 +71,43 @@ func getFieldOmitTag(field reflect.StructField, scene string) tagInfo {
 	tagInfoEl := tagInfo{}
 	//没开缓存就获取tag
 	jsonTag, ok := field.Tag.Lookup("json")
-	var tag tag
-	if !ok {
-		tag = newOmitNotTag(scene, field.Name)
+	var t tag
+	if !ok { //	没有json标签时判断是否为匿名字段
+		if field.Anonymous {
+			t = newAnonymousDefaultTag(scene, field.Name)
+		} else {
+			t = newOmitNotTag(scene, field.Name)
+		}
 	} else {
 		if jsonTag == "-" {
 			tagInfoEl.omit = true
 			return tagInfoEl
 		}
-		tag = newOmitTag(jsonTag, scene, field.Name)
+		t = newOmitTag(jsonTag, scene, field.Name)
 	}
-	tagInfoEl.tag = tag
+	tagInfoEl.tag = t
 	return tagInfoEl
 }
 func getFieldSelectTag(field reflect.StructField, scene string) tagInfo {
 	tagInfoEl := tagInfo{}
 	//没开缓存就获取tag
 	jsonTag, ok := field.Tag.Lookup("json")
-	var tag tag
+	var t tag
 	if !ok {
-		tagInfoEl.omit = true
-		return tagInfoEl
+		if field.Anonymous {
+			t = newAnonymousDefaultTag(scene, field.Name)
+		} else {
+			tagInfoEl.omit = true
+			return tagInfoEl
+		}
 	} else {
 		if jsonTag == "-" {
 			tagInfoEl.omit = true
 			return tagInfoEl
 		}
-		tag = newSelectTag(jsonTag, scene, field.Name)
+		t = newSelectTag(jsonTag, scene, field.Name)
 	}
-	tagInfoEl.tag = tag
+	tagInfoEl.tag = t
 	return tagInfoEl
 }
 func getOmitTag(scene string, pkgInfo string, i int, typeOf reflect.Type) tagInfo {
@@ -222,7 +230,8 @@ func parserStruct(typeOf reflect.Type, valueOf reflect.Value, t *fieldNodeTree, 
 	}
 	pkgInfo := typeOf.PkgPath() + "." + typeOf.Name()
 	for i := 0; i < typeOf.NumField(); i++ {
-		if !typeOf.Field(i).IsExported() { //跳过非导出字段
+		structField := typeOf.Field(i)
+		if !structField.IsExported() { //跳过非导出字段
 			continue
 		}
 		var tagInfo tagInfo
@@ -234,23 +243,23 @@ func parserStruct(typeOf reflect.Type, valueOf reflect.Value, t *fieldNodeTree, 
 		if tagInfo.omit {
 			continue
 		}
-		tag := tagInfo.tag
-		if tag.IsOmitField || !tag.IsSelect {
+		fieldTag := tagInfo.tag // 更改变量名称，避免混淆
+		if fieldTag.IsOmitField || !fieldTag.IsSelect {
 			continue
 		}
-		isAnonymous := typeOf.Field(i).Anonymous && tag.IsAnonymous ////什么时候才算真正的匿名字段？ Book中Article才算匿名结构体
+		isAnonymous := structField.Anonymous && fieldTag.IsAnonymous // 没有json的匿名字段也会为true
 
 		tree := &fieldNodeTree{
-			Key:         tag.UseFieldName,
+			Key:         fieldTag.UseFieldName,
 			ParentNode:  t,
 			IsAnonymous: isAnonymous,
 		}
 		value := valueOf.Field(i)
-		if tag.Function != "" { //解析并调用func选择器
-			function := valueOf.MethodByName(tag.Function)
+		if fieldTag.Function != "" { //解析并调用func选择器
+			function := valueOf.MethodByName(fieldTag.Function)
 			if !function.IsValid() {
 				if valueOf.CanAddr() {
-					function = valueOf.Addr().MethodByName(tag.Function)
+					function = valueOf.Addr().MethodByName(fieldTag.Function)
 				}
 			}
 			if function.IsValid() {
@@ -264,11 +273,15 @@ func parserStruct(typeOf reflect.Type, valueOf reflect.Value, t *fieldNodeTree, 
 		TakeFieldValue:
 			if value.Kind() == reflect.Ptr {
 				if value.IsNil() {
-					if tag.Omitempty {
+					if fieldTag.Omitempty {
 						continue
 					}
 					tree.IsNil = true
-					t.AddChild(tree)
+					if t.IsAnonymous { // 如果父节点也是匿名展开的一部分
+						t.AnonymousAddChild(tree) // 向上查找并添加
+					} else {
+						t.AddChild(tree) // 直接添加到父节点
+					}
 					continue
 				} else {
 					value = value.Elem()
@@ -276,7 +289,7 @@ func parserStruct(typeOf reflect.Type, valueOf reflect.Value, t *fieldNodeTree, 
 				}
 			}
 		} else {
-			if tag.Omitempty {
+			if fieldTag.Omitempty {
 				if value.IsZero() { //为零值忽略
 					continue
 				}
@@ -298,7 +311,7 @@ func parserStruct(typeOf reflect.Type, valueOf reflect.Value, t *fieldNodeTree, 
 			}
 
 		}
-		tree.parseAny(tag.UseFieldName, scene, value, isSelect)
+		tree.parseAny(fieldTag.UseFieldName, scene, value, isSelect)
 
 		if t.IsAnonymous {
 			t.AnonymousAddChild(tree)
