@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/liu-cn/json-filter/filter"
+
+	"github.com/miloxing/json-filter/filter"
 )
 
 func mustJson(v interface{}) string {

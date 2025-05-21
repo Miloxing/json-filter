@@ -4,8 +4,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/liu-cn/json-filter/filter"
 	"time"
+
+	"github.com/miloxing/json-filter/filter"
 )
 
 //同一个结构体，你可能想要在article 接口下只返回UID Avatar Nickname这三个字段就够了，其他字段不想要暴露

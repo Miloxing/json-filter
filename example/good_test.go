@@ -1,6 +1,6 @@
 package main
 
-import "github.com/liu-cn/json-filter/filter"
+import "github.com/miloxing/json-filter/filter"
 
 type UserModel struct {
 	UID    uint        `json:"uid,select($any)"` //标记了$any无论选择任何场景都会解析该参数

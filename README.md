@@ -55,7 +55,7 @@ Support direct filtering of the following data structures
 
 ```go
 //First, you need to introduce the following package：
-github.com/liu-cn/json-filter/filter
+github.com/miloxing/json-filter/filter
 ```
 
 ```go
@@ -66,7 +66,7 @@ import (
     "fmt"
     "time"
 
-    "github.com/liu-cn/json-filter/filter"
+    "github.com/miloxing/json-filter/filter"
 )
 
 //For the same structure, you may want to return only uid and avatar nickname fields under the article interface. Other fields do not want to be exposed
@@ -614,7 +614,7 @@ golang的json字段过滤器，随意选择字段，随意输出指定结构体�
 
 ```go
 //首先你需要引入下面的包：
-github.com/liu-cn/json-filter/filter
+github.com/miloxing/json-filter/filter
 ```
 
 ```go
@@ -625,7 +625,7 @@ import (
     "fmt"
     "time"
 
-    "github.com/liu-cn/json-filter/filter"
+    "github.com/miloxing/json-filter/filter"
 )
 
 //同一个结构体，你可能想要在article 接口下只返回UID Avatar Nickname这三个字段就够了，其他字段不想要暴露

@@ -2,7 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/liu-cn/json-filter/filter"
+
+	"github.com/miloxing/json-filter/filter"
 )
 
 func getCacheVal(s string, el interface{}, isSelect bool) string {

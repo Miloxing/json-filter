@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/liu-cn/json-filter/filter"
 	"testing"
+
+	"github.com/miloxing/json-filter/filter"
 )
 
 type TestInterface struct {

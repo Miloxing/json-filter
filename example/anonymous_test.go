@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/liu-cn/json-filter/filter"
+	"github.com/miloxing/json-filter/filter"
 	"testing"
 )
 

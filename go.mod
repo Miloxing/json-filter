@@ -1,4 +1,4 @@
-module github.com/liu-cn/json-filter
+module github.com/miloxing/json-filter
 
 go 1.17
 
